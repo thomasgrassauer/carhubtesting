@@ -1,4 +1,4 @@
-package at.hakspittal.carhub;
+package at.hakspittal.carhub.ui;
 
 public class User {
 

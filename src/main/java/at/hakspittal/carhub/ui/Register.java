@@ -1,4 +1,4 @@
-package at.hakspittal.carhub;
+package at.hakspittal.carhub.ui;
 
 import javax.swing.JFrame;
 import java.awt.Color;
@@ -9,6 +9,9 @@ import javax.swing.JOptionPane;
 
 import java.awt.Font;
 import javax.swing.SwingConstants;
+
+import at.hakspittal.carhub.DBConnection;
+
 import javax.swing.JTextField;
 import java.awt.Canvas;
 import javax.swing.JButton;
@@ -120,7 +123,7 @@ public class Register extends JFrame{
 						try {
 							db.connectDB();
 							System.out.println("Update wird durchgeführt");
-							stmt = db.con.prepareStatement(query);
+							stmt = db.getConnection().prepareStatement(query);
 							stmt.executeUpdate();
 							
 							if (stmt.getUpdateCount() == 0) {

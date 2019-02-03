@@ -1,4 +1,4 @@
-package at.hakspittal.carhub;
+package at.hakspittal.carhub.ui;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -16,6 +16,9 @@ import java.awt.Font;
 import java.awt.Toolkit;
 
 import javax.swing.SwingConstants;
+
+import at.hakspittal.carhub.DBConnection;
+
 import java.awt.Canvas;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
@@ -53,7 +56,7 @@ public class BuyCar extends JFrame{
 		
 		try {
 			db.connectDB();
-			stmt = db.con.prepareStatement("SELECT * FROM fahrzeuge");	
+			stmt = db.getConnection().prepareStatement("SELECT * FROM fahrzeuge");	
 			rs = stmt.executeQuery();
 			
 			while(rs.next()){
@@ -250,7 +253,7 @@ public class BuyCar extends JFrame{
 					db.connectDB();
 					query = "DELETE FROM `fahrzeuge` WHERE id = " + car.getId();
 					//System.out.println(query);
-					stmt = db.con.prepareStatement(query);
+					stmt = db.getConnection().prepareStatement(query);
 					stmt.executeUpdate();
 					
 					if (stmt.getUpdateCount() == 0){

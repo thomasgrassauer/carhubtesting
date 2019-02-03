@@ -1,4 +1,4 @@
-package at.hakspittal.carhub;
+package at.hakspittal.carhub.ui;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -18,6 +18,9 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
+
+import at.hakspittal.carhub.DBConnection;
+
 import javax.swing.JPasswordField;
 import java.awt.SystemColor;
 import java.awt.Toolkit;
@@ -122,7 +125,7 @@ public class LogIn extends JFrame {
 					try {
 						db.connectDB();
 
-						stmt = db.con.prepareStatement(
+						stmt = db.getConnection().prepareStatement(
 								"select username,password, count(username) as usercount from user where username = '"
 										+ txtUsern.getText() + "' and password = '" + password + "'");
 						rs = stmt.executeQuery();
@@ -138,7 +141,7 @@ public class LogIn extends JFrame {
 								JOptionPane.showMessageDialog(null, "SUCCESFULLY LOGGED IN", "LOGIN",
 										JOptionPane.INFORMATION_MESSAGE);
 
-								Verwaltung verw = new Verwaltung();
+								Administration verw = new Administration();
 								verw.setVisible(true);
 							}
 

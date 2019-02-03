@@ -1,4 +1,4 @@
-package at.hakspittal.carhub;
+package at.hakspittal.carhub.ui;
 
 import javax.swing.JFrame;
 import java.awt.Color;
@@ -15,7 +15,7 @@ import java.awt.Canvas;
 import java.awt.SystemColor;
 import java.awt.Toolkit;
 
-public class Verwaltung extends JFrame{
+public class Administration extends JFrame{
 	private static final long serialVersionUID = -4516355876247291473L;
 
 	private String username;
@@ -27,12 +27,12 @@ public class Verwaltung extends JFrame{
 	private int x = 0, y= 0;
 	private int width = 787, height = 530; 
 	
-	public Verwaltung(String username){
+	public Administration(String username){
 		super();
 		this.username = username;
 	}
 
-	public Verwaltung() {
+	public Administration() {
 		t = Toolkit.getDefaultToolkit();
 		Dimension d = t.getScreenSize();
 		x = (int)(d.getWidth() - width) / 2;
@@ -73,7 +73,7 @@ public class Verwaltung extends JFrame{
 		getContentPane().add(canvas_4);
 		
 		JLabel label = new JLabel("");
-		label.setIcon(new ImageIcon(Verwaltung.class.getResource("/images/meriwabuy.png")));
+		label.setIcon(new ImageIcon(Administration.class.getResource("/images/meriwabuy.png")));
 		label.setBounds(419, 116, 300, 300);
 		getContentPane().add(label);
 		btnBuy.addActionListener(myListener);
@@ -102,7 +102,7 @@ public class Verwaltung extends JFrame{
 		
 		JLabel lblNewLabel = new JLabel("");
 		lblNewLabel.setBackground(new Color(240, 240, 240));
-		lblNewLabel.setIcon(new ImageIcon(Verwaltung.class.getResource("/images/meriwasell.png")));
+		lblNewLabel.setIcon(new ImageIcon(Administration.class.getResource("/images/meriwasell.png")));
 		lblNewLabel.setBounds(51, 116, 300, 300);
 		getContentPane().add(lblNewLabel);
 	}

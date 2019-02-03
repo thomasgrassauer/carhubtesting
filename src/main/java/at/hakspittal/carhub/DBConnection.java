@@ -4,9 +4,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-
-	public class DBConnection {
-		Connection  con;
+public class DBConnection {
+	
+	private Connection  con;
 
 	public DBConnection(){
 		try{
@@ -16,6 +16,10 @@ import java.sql.SQLException;
 			System.err.println("Treiber wurde nicht gefunden");
 			e.printStackTrace();
 		}
+	}
+	
+	public Connection getConnection() {
+		return this.con;
 	}
 
 	public void connectDB(){

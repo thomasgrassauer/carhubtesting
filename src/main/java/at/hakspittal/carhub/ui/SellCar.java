@@ -1,4 +1,4 @@
-package at.hakspittal.carhub;
+package at.hakspittal.carhub.ui;
 
 import javax.swing.JFrame;
 import java.awt.Color;
@@ -9,6 +9,9 @@ import javax.swing.JOptionPane;
 
 import java.awt.Font;
 import javax.swing.SwingConstants;
+
+import at.hakspittal.carhub.DBConnection;
+
 import javax.swing.JButton;
 import javax.swing.ImageIcon;
 import java.awt.event.ActionListener;
@@ -184,7 +187,7 @@ public class SellCar extends JFrame {
 
 		try {
 			db.connectDB();
-			stmt = db.con.prepareStatement("select * from category");
+			stmt = db.getConnection().prepareStatement("select * from category");
 			rs = stmt.executeQuery();
 
 			while (rs.next()) {
@@ -227,7 +230,7 @@ public class SellCar extends JFrame {
 						try {
 							db.connectDB();
 	
-							stmt = db.con.prepareStatement(query);
+							stmt = db.getConnection().prepareStatement(query);
 							stmt.executeUpdate();
 							if (stmt.getUpdateCount() == 0){
 								JOptionPane.showMessageDialog(null, "AN ERROR OCCURRED - PLEASE TRY AGAIN");
