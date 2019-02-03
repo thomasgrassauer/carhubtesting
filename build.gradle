@@ -6,6 +6,8 @@ mainClassName = 'at.hakspittal.carhub.Start'
 
 // In this section you declare the dependencies of your project
 dependencies {
+	runtime 'mysql:mysql-connector-java:8.0.15'
+
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
 }
