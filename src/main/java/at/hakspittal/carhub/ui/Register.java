@@ -10,15 +10,15 @@ import javax.swing.JOptionPane;
 import java.awt.Font;
 import javax.swing.SwingConstants;
 
-import at.hakspittal.carhub.DBConnection;
+import at.hakspittal.carhub.Start;
+import at.hakspittal.carhub.User;
+import at.hakspittal.carhub.services.UserService;
+import at.hakspittal.carhub.services.UserService.RegistrationResult;
 
 import javax.swing.JTextField;
 import java.awt.Canvas;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.awt.event.ActionEvent;
 import java.awt.SystemColor;
 import java.awt.Toolkit;
@@ -41,8 +41,11 @@ public class Register extends JFrame{
 	private int x = 0, y= 0;
 	private int width = 846, height = 575; 
 
+	private final UserService userService;
 		
 	public Register() {
+		this.userService = new UserService(Start.getPersistance());
+		
 		t = Toolkit.getDefaultToolkit();
 		Dimension d = t.getScreenSize();
 		x = (int)(d.getWidth() - width) / 2;
@@ -98,58 +101,44 @@ public class Register extends JFrame{
 		getContentPane().add(canvas_3);
 		
 		btnRegister.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-
-				DBConnection db = new DBConnection();
-				PreparedStatement stmt = null;
-				String query = "";
-				
+			public void actionPerformed(ActionEvent event) {
 				if (txtUser.getText().equals("")||txtPW.getText().equals("")||txtZip.getText().equals("")||txtCity.getText().equals("")||txtFN.getText().equals("")||txtSN.getText().equals("")){
 					JOptionPane.showMessageDialog(null,
 						    "SOME TEXT FIELDS ARE NOT FILLED",
 						    "ERROR",
 						    JOptionPane.ERROR_MESSAGE);
 				}
-				else{
+				else {
+					User m1 = new User(
+							txtUser.getText(),
+							txtPW.getText(),
+							txtZip.getText(),
+							txtCity.getText(),
+							txtFN.getText(),
+							txtSN.getText());
 					
-					User m1 = new User(txtUser.getText(),txtPW.getText(),txtZip.getText(),txtCity.getText(),txtFN.getText(),txtSN.getText());
-					query = "INSERT INTO `user`(username, password, zipcode, city,  firstname, lastname) VALUES ("  +
-					       "'" + m1.getUsername()+"'" + "," +"'" + m1.getPassword() +"'" + "," +"'" + m1.getZipcode() +
-					       "'" + "," +"'" + m1.getCity() +"'" + "," +"'" + m1.getFirstname() +"'" + "," +"'" + m1.getSurname() +"'" + ")";
-
-					//System.out.println(query);
-				
-
-						try {
-							db.connectDB();
-							System.out.println("Update wird durchgeführt");
-							stmt = db.getConnection().prepareStatement(query);
-							stmt.executeUpdate();
-							
-							if (stmt.getUpdateCount() == 0) {
-								JOptionPane.showMessageDialog(null,
-									    "SOMETHING WENT WRONG DURING THE REGISTRATION, TRY AGAIN",
-									    "REGISTER",
-									    JOptionPane.ERROR_MESSAGE);
-								
-							} else {
-								JOptionPane.showMessageDialog(null,
-									    "SUCCESFULLY REGISTERED",
-									    "REGISTER",
-									    JOptionPane.INFORMATION_MESSAGE);
-							
-							}
-							
-							
-						} catch (SQLIntegrityConstraintViolationException d) {
-						    // Duplicate entry
+					RegistrationResult registrationResult = userService.registerUser(m1);
+					
+					switch(registrationResult) {
+						case OK:
+							JOptionPane.showMessageDialog(null,
+								    "SUCCESFULLY REGISTERED",
+								    "REGISTER",
+								    JOptionPane.INFORMATION_MESSAGE);
+							break;
+						case USER_EXISTS:
 							JOptionPane.showMessageDialog(null,
 								    "USERNAME ALREADY EXISTS",
 								    "ERROR",
 								    JOptionPane.ERROR_MESSAGE);
-						} catch (SQLException d) {
-						    // Other SQL Exception
-						}				
+							break;
+						case ERROR:
+						default:
+							JOptionPane.showMessageDialog(null,
+									"SOMETHING WENT WRONG DURING THE REGISTRATION, TRY AGAIN",
+								    "REGISTER",
+								    JOptionPane.ERROR_MESSAGE);
+					}
 				}
 			}
 		});

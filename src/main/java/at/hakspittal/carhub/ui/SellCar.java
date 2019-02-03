@@ -10,14 +10,16 @@ import javax.swing.JOptionPane;
 import java.awt.Font;
 import javax.swing.SwingConstants;
 
-import at.hakspittal.carhub.DBConnection;
+import at.hakspittal.carhub.Car;
+import at.hakspittal.carhub.Start;
+import at.hakspittal.carhub.services.CarService;
 
 import javax.swing.JButton;
 import javax.swing.ImageIcon;
 import java.awt.event.ActionListener;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.awt.event.ActionEvent;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
@@ -27,7 +29,8 @@ import java.awt.SystemColor;
 import java.awt.Toolkit;
 
 public class SellCar extends JFrame {
-
+	private static final SimpleDateFormat DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd");
+	
 	private static final long serialVersionUID = -5505565473394061120L;
 	JButton btnSell = new JButton("SELL CAR");
 	JButton btnBack = new JButton("BACK");
@@ -43,8 +46,12 @@ public class SellCar extends JFrame {
 	private Toolkit t;
 	private int x = 0, y = 0;
 	private int width = 814, height = 561;
+	
+	private final CarService carService;
 
 	public SellCar() {
+		carService = new CarService(Start.getPersistance());
+		
 		t = Toolkit.getDefaultToolkit();
 		Dimension d = t.getScreenSize();
 		x = (int) (d.getWidth() - width) / 2;
@@ -181,29 +188,16 @@ public class SellCar extends JFrame {
 	}
 
 	public void fertl() {
-		DBConnection db = new DBConnection();
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-
-		try {
-			db.connectDB();
-			stmt = db.getConnection().prepareStatement("select * from category");
-			rs = stmt.executeQuery();
-
-			while (rs.next()) {
-				cbCate.addItem(rs.getString(2));
-			}
-
-		} catch (SQLException e) {
-			e.printStackTrace();
+		for(String category : Start.getPersistance().getCategories()) {
+			cbCate.addItem(category);
 		}
 	}
-
+	
 	private class MyActionListener implements ActionListener {
 
-		public void actionPerformed(ActionEvent e) {
+		public void actionPerformed(ActionEvent event) {
 
-			if (e.getSource() == btnSell) {
+			if (event.getSource() == btnSell) {
 
 				if ( cbCate.getSelectedIndex() == -1 || txtBrand.getText().isEmpty() ||
 					 txtType.getText().isEmpty() || txtFirstReg.getText().isEmpty() ||
@@ -211,49 +205,37 @@ public class SellCar extends JFrame {
 					
 					JOptionPane.showMessageDialog(null, "MISSING ENTRIES");
 					
-				}
-				else {
-					DBConnection db = new DBConnection();
-					PreparedStatement stmt = null;
-					String query = "";
-					
+				} else {					
+					Date parsedDate = null;
+					int mileage = 0;
 					try {
-						int number = Integer.parseInt(txtKM.getText());
-						query = "INSERT INTO `fahrzeuge`(category, marke, modell, erstzulassung, kraftstoffart, km, description) VALUES ("
-								+ "'" + cbCate.getSelectedItem() + "'" + "," + "'" + txtBrand.getText() + "'" + "," + "'"
-								+ txtType.getText() + "'" + "," + "'" + txtFirstReg.getText() + "'" + "," + "'"
-								+ txtFt.getText() + "'" + "," + "'" + txtKM.getText() + "'" + "," + "'" + epDesc.getText()
-								+ "'" + ")";
-	
-						//System.out.println(query);
-	
-						try {
-							db.connectDB();
-	
-							stmt = db.getConnection().prepareStatement(query);
-							stmt.executeUpdate();
-							if (stmt.getUpdateCount() == 0){
-								JOptionPane.showMessageDialog(null, "AN ERROR OCCURRED - PLEASE TRY AGAIN");
-								
-							}
-							else {
-								JOptionPane.showMessageDialog(null, "YOUR CAR IS REGISTERED");
-								dispose(); //Fenster schlie√üen
-							}	
-							
-							
-						} catch (SQLException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
+						parsedDate = DATEFORMAT.parse(txtFirstReg.getText());
+						mileage = Integer.parseInt(txtKM.getText());
+						
+						Car car = new Car(
+								cbCate.getSelectedItem().toString(),
+								txtBrand.getText(),
+								txtType.getText(),
+								parsedDate,
+								txtFt.getText(),
+								mileage,
+								epDesc.getText());
+						
+						if (carService.sellCar(car)) {
+							JOptionPane.showMessageDialog(null, "YOUR CAR IS REGISTERED");
+							dispose(); //Fenster schlieﬂen
+						} else {
+							JOptionPane.showMessageDialog(null, "AN ERROR OCCURRED - PLEASE TRY AGAIN");
 						}
-	
-					} catch (NumberFormatException ex) {
+					} catch (ParseException e1) {
+						JOptionPane.showMessageDialog(null, "DATE ENTRY WRONG");
+					} catch (NumberFormatException e) {
 						JOptionPane.showMessageDialog(null, "KM ENTRY WRONG");
 					}
 				}
 			}
 
-			if (e.getSource() == btnBack) {
+			if (event.getSource() == btnBack) {
 				setVisible(false);
 			}
 

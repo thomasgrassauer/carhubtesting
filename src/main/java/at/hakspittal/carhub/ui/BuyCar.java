@@ -4,9 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -17,7 +15,9 @@ import java.awt.Toolkit;
 
 import javax.swing.SwingConstants;
 
-import at.hakspittal.carhub.DBConnection;
+import at.hakspittal.carhub.Car;
+import at.hakspittal.carhub.Start;
+import at.hakspittal.carhub.services.CarService;
 
 import java.awt.Canvas;
 import javax.swing.JButton;
@@ -25,7 +25,8 @@ import javax.swing.JEditorPane;
 import javax.swing.JComboBox;
 
 public class BuyCar extends JFrame{
-
+	private static final SimpleDateFormat DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd");
+		
 	private static final long serialVersionUID = -6511467318286881650L;
 	JLabel lblCat = new JLabel("");
 	JLabel lblBrand = new JLabel("");
@@ -47,55 +48,35 @@ public class BuyCar extends JFrame{
 	private int x = 0, y= 0;
 	private int width = 814, height = 486; 
 	
+	private final CarService carService;
 
-	public void ComboBCarAdd(){
-		
-		DBConnection db = new DBConnection();
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		try {
-			db.connectDB();
-			stmt = db.getConnection().prepareStatement("SELECT * FROM fahrzeuge");	
-			rs = stmt.executeQuery();
-			
-			while(rs.next()){
-			
-				Car car= new Car(rs.getInt(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getDate(5),rs.getString(6),rs.getString(7),rs.getString(8));
-				carlist.add(car);
-			}
-			
-			
-			for (int i = 0;i<carlist.size();i++){
-			    
-			    cbCarz.addItem(carlist.get(i).getMarke()+" "+carlist.get(i).getModell());
-			}
-			
+	private void fillCars() {
+		for(Car car : carService.getCars()) {
+			carlist.add(car);
+			cbCarz.addItem(car.getMake()+" "+car.getModel());
 		}
-		catch (SQLException e){
-			e.printStackTrace();
-		} 	 	
-					
-		
-
 	}
 	
 	public void CarDetailsGui(){
-
-		int car = cbCarz.getSelectedIndex();
-		lblCat.setText(carlist.get(car).getCategory());
-		lblBrand.setText(carlist.get(car).getMarke());
-		lblType.setText(carlist.get(car).getModell());
-		lblFirstReg.setText(String.valueOf(carlist.get(car).getErstzulassung()));
-		lblFt.setText(carlist.get(car).getKraftstoffart());
-		lblKm.setText(carlist.get(car).getKm());
-		epDesc.setText(carlist.get(car).getDesc());
-
+		int carIndex = cbCarz.getSelectedIndex();
 		
+		if (carIndex >= 0) {
+			Car car = carlist.get(carIndex);
+			
+			lblCat.setText(car.getCategory());
+			lblBrand.setText(car.getMake());
+			lblType.setText(car.getModel());
+			lblFirstReg.setText(DATEFORMAT.format(car.getDateOfRegistration()));
+			lblFt.setText(car.getTypeOfFuel());
+			lblKm.setText(String.valueOf(car.getMileage()));
+			epDesc.setText(car.getDescription());
+		}
 	}
 	
 	public BuyCar() {
-		ComboBCarAdd();
+		carService = new CarService(Start.getPersistance());
+		
+		fillCars();
 		CarDetailsGui();
 		t = Toolkit.getDefaultToolkit();
 		Dimension d = t.getScreenSize();
@@ -198,22 +179,17 @@ public class BuyCar extends JFrame{
 		lblCat.setBounds(176, 210, 161, 14);
 		getContentPane().add(lblCat);
 		
-		
 		lblBrand.setBounds(176, 246, 161, 14);
 		getContentPane().add(lblBrand);
 		
-		
-		lblType.setBounds(176, 313, 161, 14);
+		lblType.setBounds(176, 281, 161, 14);
 		getContentPane().add(lblType);
 		
-		
-		lblFirstReg.setBounds(176, 281, 161, 14);
+		lblFirstReg.setBounds(176, 313, 161, 14);
 		getContentPane().add(lblFirstReg);
-		
 		
 		lblFt.setBounds(176, 349, 161, 14);
 		getContentPane().add(lblFt);
-		
 		
 		lblKm.setBounds(176, 381, 161, 14);
 		getContentPane().add(lblKm);
@@ -238,46 +214,24 @@ public class BuyCar extends JFrame{
 	private class MyActionListener implements ActionListener{
 
 		@Override
-		public void actionPerformed(ActionEvent e) {
+		public void actionPerformed(ActionEvent event) {
 
-			if (e.getSource()== btnBuy) {
-				
-				DBConnection db = new DBConnection();
-				PreparedStatement stmt = null;
-				String query = "";
-				
-							
-				try {
-					Car car = (Car)carlist.get(cbCarz.getSelectedIndex());
-					
-					db.connectDB();
-					query = "DELETE FROM `fahrzeuge` WHERE id = " + car.getId();
-					//System.out.println(query);
-					stmt = db.getConnection().prepareStatement(query);
-					stmt.executeUpdate();
-					
-					if (stmt.getUpdateCount() == 0){
-						JOptionPane.showMessageDialog(null, "AN ERROR OCCURRED - PLEASE TRY AGAIN");
-						
-					}
-					else {
-						JOptionPane.showMessageDialog(null,
-							    "Congratulations!\n" +
-								"HAVE FUN WITH YOUR NEW CAR!");
-						dispose(); //Fenster schlie√üen
-					}	
-					
-					
-				} catch (SQLException e1) {
-					e1.printStackTrace();
+			if (event.getSource()== btnBuy) {
+				Car car = (Car)carlist.get(cbCarz.getSelectedIndex());
+				if (carService.buyCar(car)) {
+					JOptionPane.showMessageDialog(null,
+						    "Congratulations!\n" +
+							"HAVE FUN WITH YOUR NEW CAR!");
+					dispose(); //Fenster schlieﬂen
+				} else {
+					JOptionPane.showMessageDialog(null, "AN ERROR OCCURRED - PLEASE TRY AGAIN");
 				}
 			}
 			
-			if (e.getSource()== btnBack) {
+			if (event.getSource()== btnBack) {
 				dispose();
 				
 			}
-			
 		}
 	}
 	

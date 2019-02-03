@@ -5,9 +5,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import java.awt.Font;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -19,7 +16,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
 
-import at.hakspittal.carhub.DBConnection;
+import at.hakspittal.carhub.Start;
+import at.hakspittal.carhub.services.UserService;
 
 import javax.swing.JPasswordField;
 import java.awt.SystemColor;
@@ -39,7 +37,10 @@ public class LogIn extends JFrame {
 	private int x = 0, y = 0;
 	private int width = 664, height = 454;
 
+	private final UserService userService;
+	
 	public LogIn() {
+		userService = new UserService(Start.getPersistance());
 
 		t = Toolkit.getDefaultToolkit();
 		Dimension d = t.getScreenSize();
@@ -108,50 +109,24 @@ public class LogIn extends JFrame {
 		btnLogin.setBounds(345, 382, 121, 23);
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
-				DBConnection db = new DBConnection();
-				PreparedStatement stmt = null;
-				ResultSet rs = null;
-				
-				String password = String.valueOf(txtPW.getPassword());
-
-				System.out.println(password);
-
 				if (txtUsern.getText().isEmpty() || txtPW.getPassword().equals("")) {
 					JOptionPane.showMessageDialog(null, "SOME TEXT FIELDS ARE NOT FILLED", "ERROR",
 							JOptionPane.ERROR_MESSAGE);
 				} else {
-
-					try {
-						db.connectDB();
-
-						stmt = db.getConnection().prepareStatement(
-								"select username,password, count(username) as usercount from user where username = '"
-										+ txtUsern.getText() + "' and password = '" + password + "'");
-						rs = stmt.executeQuery();
-
-						while (rs.next()) {
-
-							if (rs.getInt(3) == 0) {
-
-								JOptionPane.showMessageDialog(null, "INCORRECT LOGIN DETAILS", "ERROR",
-										JOptionPane.ERROR_MESSAGE);
-
-							} else {
-								JOptionPane.showMessageDialog(null, "SUCCESFULLY LOGGED IN", "LOGIN",
-										JOptionPane.INFORMATION_MESSAGE);
-
-								Administration verw = new Administration();
-								verw.setVisible(true);
-							}
-
-						}
+					
+					String password = String.valueOf(txtPW.getPassword());
+					String username = txtUsern.getText();
+					
+					if (userService.login(username, password)) {
+						JOptionPane.showMessageDialog(null, "SUCCESFULLY LOGGED IN", "LOGIN",
+								JOptionPane.INFORMATION_MESSAGE);
+						
+						Administration verw = new Administration();
+						verw.setVisible(true);
+					} else {
+						JOptionPane.showMessageDialog(null, "INCORRECT LOGIN DETAILS", "ERROR",
+								JOptionPane.ERROR_MESSAGE);
 					}
-
-					catch (SQLException o) {
-						o.printStackTrace();
-					}
-
 				}
 			}
 		});
@@ -172,15 +147,12 @@ public class LogIn extends JFrame {
 
 			if (e.getSource() == btnLogin) {
 				dispose();
-
 			}
 
 			if (e.getSource() == btnReg) {
-
 				setVisible(false);
 				Register frameReg = new Register();
 				frameReg.setVisible(true);
-
 			}
 		}
 	}
