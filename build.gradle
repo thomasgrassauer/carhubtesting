@@ -1,0 +1,16 @@
+plugins {
+    id 'application'
+}
+
+mainClassName = 'at.hakspittal.carhub.Start'
+
+// In this section you declare the dependencies of your project
+dependencies {
+    // Use JUnit test framework
+    testImplementation 'junit:junit:4.12'
+}
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+    jcenter()
+}
