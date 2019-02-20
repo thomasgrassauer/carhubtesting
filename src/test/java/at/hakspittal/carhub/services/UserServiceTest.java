@@ -2,20 +2,30 @@ package at.hakspittal.carhub.services;
 
 import at.hakspittal.carhub.User;
 import at.hakspittal.carhub.peristence.DataPersistence;
-import at.hakspittal.carhub.peristence.InMemoryDataPersistence;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.*;
 
+@RunWith(MockitoJUnitRunner.class)
 public class UserServiceTest {
 
-    private DataPersistence persistence = new InMemoryDataPersistence();
+    @Mock
+    DataPersistence persistence;
 
     private UserService target;
 
     @Before
     public void setUp() {
+        Mockito.when(persistence.userExists(Matchers.eq("admin"))).thenReturn(true);
+        Mockito.when(persistence.storeUser(Matchers.any())).thenReturn(true);
+        Mockito.when(persistence.login(Matchers.eq("admin"), Matchers.eq("admin"))).thenReturn(true);
+
         target = new UserService(persistence);
     }
 
@@ -137,6 +147,20 @@ public class UserServiceTest {
 
         // then
         assertEquals(UserService.RegistrationResult.OK, actual);
+    }
+
+    @Test
+    public void testRegisterUserWithUserAndUniqueUsernameWithValuesOKButFailingPersistence() {
+        // given
+        final User user = new User("unique", "password", "zip", "city", "first", "last");
+
+        Mockito.when(persistence.storeUser(Matchers.any())).thenReturn(false);
+
+        // when
+        final UserService.RegistrationResult actual = target.registerUser(user);
+
+        // then
+        assertEquals(UserService.RegistrationResult.ERROR, actual);
     }
 
     @Test
