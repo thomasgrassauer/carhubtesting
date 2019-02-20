@@ -46,7 +46,7 @@ public class UserServiceTest {
     @Test
     public void testRegisterUserWithUserAndExistingUsername() {
         // given
-        final User user = new User("admin");
+        final User user = new User("admin", "password", "zip", "city", "first", "last");
 
         // when
         final UserService.RegistrationResult actual = target.registerUser(user);

@@ -23,6 +23,34 @@ public class UserService {
 	 * @return
 	 */
 	public RegistrationResult registerUser(User user) {
+		if (user == null) {
+			return RegistrationResult.ERROR;
+		}
+
+		if (user.getUsername() == null || user.getUsername().equals("")) {
+			return RegistrationResult.ERROR;
+		}
+
+		if (user.getPassword() == null || user.getPassword().equals("")) {
+			return RegistrationResult.ERROR;
+		}
+
+		if (user.getZipcode() == null || user.getZipcode().equals("")) {
+			return RegistrationResult.ERROR;
+		}
+
+		if (user.getCity() == null || user.getCity().equals("")) {
+			return RegistrationResult.ERROR;
+		}
+
+		if (user.getFirstname() == null || user.getFirstname().equals("")) {
+			return RegistrationResult.ERROR;
+		}
+
+		if (user.getSurname() == null || user.getSurname().equals("")) {
+			return RegistrationResult.ERROR;
+		}
+
 		// check if username already exists
 		boolean userExists = persistence.userExists(user.getUsername());
 		
