@@ -18,7 +18,3 @@ Car Hub Testing
 4. Open project in Eclipse
 
    File -> Import... -> General -> Existing projects into Workspace
-
-5. ???
-
-6. Profit
